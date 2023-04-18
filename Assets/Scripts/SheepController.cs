@@ -46,6 +46,7 @@ public class SheepController : MonoBehaviour
 
     public void HarvestWool()
     {
+        GameControl.Instance.AddScore(25);
         hasWool = false;
 
         woolModel.SetActive(false);
@@ -62,6 +63,6 @@ public class SheepController : MonoBehaviour
 
     private void OnDisable()
     {
-        GameObject.Find("Game Control").GetComponent<GameControl>().SheepDied();
+        GameControl.Instance.SheepDied();
     }
 }

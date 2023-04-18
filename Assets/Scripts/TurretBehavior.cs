@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class TurretBehavior : MonoBehaviour
 {
-    public GameControl gameController;
     public ParticleSystem shootPart;
     Animator camAnim;
     
@@ -22,9 +21,7 @@ public class TurretBehavior : MonoBehaviour
     public float shootChargeCost = 25;
 
     public float turretDamage = 5f;
-    
-    [Header("UI")]
-    public Slider chargeBar, shootBar;
+   
 
     private void Start()
     {
@@ -32,6 +29,7 @@ public class TurretBehavior : MonoBehaviour
         
         curShootCountdown = maxShootCountdown;
         UpdateCharge();
+        GameControl.Instance.turret = this;
     }
 
     public void AddCharge()
@@ -42,17 +40,17 @@ public class TurretBehavior : MonoBehaviour
 
     private void UpdateCharge()
     {
-        chargeBar.value = curCharge/maxCharge;
+        GameControl.Instance.chargeSlider.value = curCharge/maxCharge;
     }
 
     private void Update()
     {
         // attack loop
-        shootBar.value = curShootCountdown/maxShootCountdown;
+        GameControl.Instance.shootSlider.value = curShootCountdown/maxShootCountdown;
 
         if(curCharge >= shootChargeCost)
         {
-            if(gameController.enemySpawner.enemyHolder.childCount == 0)
+            if(GameControl.Instance.enemySpawner.enemyHolder.childCount == 0)
                 return;
             
             curShootCountdown -= Time.deltaTime;
@@ -64,7 +62,7 @@ public class TurretBehavior : MonoBehaviour
 
     private void DoAttack()
     {
-        Transform ene = gameController.enemySpawner.enemyHolder.GetChild(0);
+        Transform ene = GameControl.Instance.enemySpawner.enemyHolder.GetChild(0);
         ene.gameObject.GetComponent<EnemyRotation>().TakeDamage(turretDamage);
 
         shootPart.Play();
