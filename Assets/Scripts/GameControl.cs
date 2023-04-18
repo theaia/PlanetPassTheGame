@@ -40,7 +40,7 @@ public class GameControl : MonoBehaviour
     public Slider percentSlider;
     public Slider chargeSlider;
     public Slider shootSlider;
-    public GameObject planetPrefab;
+    public GameObject dummyPlanet;
     public GameObject activePlanet;
 
     [Header("Sheep Management")]
@@ -80,18 +80,32 @@ public class GameControl : MonoBehaviour
         return gameOver;
 	}
 
-    public void SpawnNewPlanet() {
+    private void SpawnNewPlanet() {
+        if(IsTransitioningWorlds) {
+            return;
+		}
+        curSheep = -1;
         IsTransitioningWorlds = true;
-        activePlanet.transform.DOMove(Camera.main.transform.right * 100f, .5f).SetEase(Ease.InElastic).OnComplete(() => {
-            activePlanet.SetActive(false);
-            activePlanet.transform.position = Camera.main.transform.right * -100f;
-            activePlanet.SetActive(true);
-            activePlanet.transform.DOMove(Vector3.zero, .5f).SetEase(Ease.OutElastic).OnComplete(() => {
-                coveredPercent = 0f;
-                worldCoverage = 0;
-                SplatManager.Instance.Start();
-            });
+        activePlanet.transform.parent.DOMove(-Camera.main.transform.right * 500f, .5f).SetEase(Ease.InBounce).OnComplete(() => {
+            dummyPlanet.SetActive(true);
+            activePlanet.transform.parent.position = -Camera.main.transform.right * 500f;
+            sheepSpawner.ClearSheep();
+            StartCoroutine(MoveInNewPlanet());
         });
+    }
+
+
+    IEnumerator MoveInNewPlanet() {
+        yield return new WaitForSeconds(1f);
+        activePlanet.transform.parent.DOMove(Vector3.zero, 1f).SetEase(Ease.OutBounce).OnComplete(() => {
+            coveredPercent = 0f;
+            worldCoverage = 0;
+            SplatManager.Instance.Start();
+            UpdateCoveredPercent();
+            dummyPlanet.SetActive(false);
+            sheepSpawner.SpawnSheep(1);
+        });
+        yield return new WaitUntil(() => curSheep > 0); 
         IsTransitioningWorlds = false;
     }
 
@@ -120,14 +134,15 @@ public class GameControl : MonoBehaviour
             TryShearWool();
         }
 
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonUp(0)) {
+            mySheep = null;
+        }
+
+        if (Input.GetMouseButtonDown(0) && !IsTransitioningWorlds)
         {
             TryStartDragSheep();
         }
 
-		if (Input.GetMouseButtonUp(0)) {
-            mySheep = null;
-        }
     }
 
     public void IncreaseXP(int xpGain)
@@ -184,7 +199,7 @@ public class GameControl : MonoBehaviour
         UpdateSheepCounter();
 
         // let you choose an upgrade
-        upgradeManager.SetupUpgradeScreen();
+        //upgradeManager.SetupUpgradeScreen();
     }
 
     public void SheepDied()
@@ -192,6 +207,7 @@ public class GameControl : MonoBehaviour
         curSheep --;
         UpdateSheepCounter();
         if(curSheep == 0 && !IsTransitioningWorlds) {
+            Debug.Log("Ending game. Sheep:" + curSheep + " IsTransitioningWorlds:" + IsTransitioningWorlds);
             GameOver();
 		}
     }
@@ -251,8 +267,8 @@ public class GameControl : MonoBehaviour
     }
 
     private void GameOver() {
-        /*gameOver = true;
-        if(GameOverScreen) GameOverScreen.SetActive(true);*/
+        gameOver = true;
+        if(GameOverScreen) GameOverScreen.SetActive(true);
 	}
 
     public void Restart() {

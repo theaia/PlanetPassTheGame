@@ -40,7 +40,7 @@ public class Suckable : MonoBehaviour
         if(inShield || GameControl.Instance.IsTransitioningWorlds)
             return;
         
-        if(beingSucked)
+        if(beingSucked && goalTrans != null)
         {
             transform.position = Vector3.MoveTowards(transform.position, goalTrans.position, suckSpeed);
 

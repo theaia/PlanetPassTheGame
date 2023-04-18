@@ -89,7 +89,7 @@ public class SplatManager : MonoBehaviour {
 	public RenderTexture splatTex;
 	public RenderTexture splatTexAlt;
 
-    public RenderTexture worldPosTex;
+	public RenderTexture worldPosTex;
 	public RenderTexture worldPosTexTemp;
 	public RenderTexture worldTangentTex;
 	public RenderTexture worldBinormalTex;
@@ -105,12 +105,17 @@ public class SplatManager : MonoBehaviour {
 	public RenderTexture RT4;
 	public Texture2D Tex4;
 
+
+	public Shader WorldPosUnwrap;
+	public Shader WorldTangentUnwrap;
+	public Shader WorldBinormalUnwrap;
+
 	// this will keep duplicate splat managers from being enabled at once
-	void Awake () {
+	void Awake() {
 
 		if (SplatManager.Instance != null) {
 			if (SplatManager.Instance != this) {
-				Destroy (this);
+				Destroy(this);
 			}
 		} else {
 			SplatManager.Instance = this;
@@ -118,58 +123,57 @@ public class SplatManager : MonoBehaviour {
 
 	}
 
-    // Use this for initialization
-    public void Start () {
+	// Use this for initialization
+	public void Start() {
 
 		SplatManagerSystem.instance.splatsX = splatsX;
 		SplatManagerSystem.instance.splatsY = splatsY;
 
-		splatBlitMaterial = new Material (Shader.Find ("Splatoonity/SplatBlit"));
-		
-		splatTex = new RenderTexture (sizeX, sizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-		splatTex.Create ();
-		splatTexAlt = new RenderTexture (sizeX, sizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-		splatTexAlt.Create ();
-		worldPosTex = new RenderTexture (sizeX, sizeY, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-		worldPosTex.Create ();
-		worldPosTexTemp = new RenderTexture (sizeX, sizeY, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-		worldPosTexTemp.Create ();
-		worldTangentTex = new RenderTexture (sizeX, sizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-		worldTangentTex.Create ();
-		worldBinormalTex = new RenderTexture (sizeX, sizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+		splatBlitMaterial = new Material(Shader.Find("Splatoonity/SplatBlit"));
+
+		splatTex = new RenderTexture(sizeX, sizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+		splatTex.Create();
+		splatTexAlt = new RenderTexture(sizeX, sizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+		splatTexAlt.Create();
+		worldPosTex = new RenderTexture(sizeX, sizeY, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+		worldPosTex.Create();
+		worldPosTexTemp = new RenderTexture(sizeX, sizeY, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+		worldPosTexTemp.Create();
+		worldTangentTex = new RenderTexture(sizeX, sizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+		worldTangentTex.Create();
+		worldBinormalTex = new RenderTexture(sizeX, sizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
 		worldBinormalTex.Create();
 
-		splatTexList = new List<RenderTexture> ();
-		splatTexAltList = new List<RenderTexture> ();
-		worldPosTexList = new List<RenderTexture> ();
+		splatTexList = new List<RenderTexture>();
+		splatTexAltList = new List<RenderTexture>();
+		worldPosTexList = new List<RenderTexture>();
 
-		Shader.SetGlobalTexture ("_SplatTex", splatTex);
-		Shader.SetGlobalTexture ("_WorldPosTex", worldPosTex);
-		Shader.SetGlobalTexture ("_WorldTangentTex", worldTangentTex);
-		Shader.SetGlobalTexture ("_WorldBinormalTex", worldBinormalTex);
-		Shader.SetGlobalVector ("_SplatTexSize", new Vector4 (sizeX, sizeY, 0, 0));
+		Shader.SetGlobalTexture("_SplatTex", splatTex);
+		Shader.SetGlobalTexture("_WorldPosTex", worldPosTex);
+		Shader.SetGlobalTexture("_WorldTangentTex", worldTangentTex);
+		Shader.SetGlobalTexture("_WorldBinormalTex", worldBinormalTex);
+		Shader.SetGlobalVector("_SplatTexSize", new Vector4(sizeX, sizeY, 0, 0));
 
 
 		// Textures for tallying scores 
 		// needs to be higher precision because it will be mipped down to 4x4 ldr texture for final score keeping
-		scoreTex = new RenderTexture (sizeX/8, sizeY/8, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
+		scoreTex = new RenderTexture(sizeX / 8, sizeY / 8, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
 		scoreTex.autoGenerateMips = true;
 		scoreTex.useMipMap = true;
-		scoreTex.Create ();
-		RT4 = new RenderTexture (4, 4, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-		RT4.Create ();
-		Tex4 = new Texture2D (4, 4, TextureFormat.ARGB32, false);
+		scoreTex.Create();
+		RT4 = new RenderTexture(4, 4, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+		RT4.Create();
+		Tex4 = new Texture2D(4, 4, TextureFormat.ARGB32, false);
 
-		
-		GameObject rtCameraObject = new GameObject ();
+		GameObject rtCameraObject = new GameObject();
 		rtCameraObject.name = "rtCameraObject";
 		rtCameraObject.transform.position = Vector3.zero;
 		rtCameraObject.transform.rotation = Quaternion.identity;
 		rtCameraObject.transform.localScale = Vector3.one;
-		rtCamera = rtCameraObject.AddComponent<Camera> ();
+		rtCamera = rtCameraObject.AddComponent<Camera>();
 		rtCamera.renderingPath = RenderingPath.Forward;
 		rtCamera.clearFlags = CameraClearFlags.SolidColor;
-		rtCamera.backgroundColor = new Color (0, 0, 0, 0);
+		rtCamera.backgroundColor = new Color(0, 0, 0, 0);
 		rtCamera.orthographic = true;
 		rtCamera.nearClipPlane = 0.0f;
 		rtCamera.farClipPlane = 1.0f;
@@ -178,12 +182,15 @@ public class SplatManager : MonoBehaviour {
 		rtCamera.useOcclusionCulling = false;
 		rtCamera.enabled = false;
 
-		RenderTextures ();
-		BleedTextures ();
-		StartCoroutine( UpdateScores() );
+		StartCoroutine(FinalizeSplatSetup());
 
-    }
-
+	}
+	IEnumerator FinalizeSplatSetup() {
+		yield return new WaitUntil(() => SplatManagerSystem.instance != null && SplatManagerSystem.instance.m_Renderers.Count > 0);
+		RenderTextures();
+		BleedTextures();
+		StartCoroutine(UpdateScores());
+	}
 	/*
 	// Render textures using shader replacement.
 	// This will render all objects in the scene though.
@@ -212,9 +219,9 @@ public class SplatManager : MonoBehaviour {
 		// Set the culling mask to Nothing so we can draw renderers explicitly
 		rtCamera.cullingMask = LayerMask.NameToLayer("Nothing");
 
-		Material worldPosMaterial = new Material (Shader.Find ("Splatoonity/WorldPosUnwrap"));
-		Material worldTangentMaterial = new Material (Shader.Find ("Splatoonity/WorldTangentUnwrap"));
-		Material worldBiNormalMaterial = new Material (Shader.Find ("Splatoonity/WorldBinormalUnwrap"));
+		Material worldPosMaterial = new Material (WorldPosUnwrap);
+		Material worldTangentMaterial = new Material (WorldTangentUnwrap);
+		Material worldBiNormalMaterial = new Material (WorldBinormalUnwrap);
 
 		// You could collect all objects you want rendererd and loop through DrawRenderer
 		// but for this example I'm just drawing the one renderer.
@@ -228,21 +235,27 @@ public class SplatManager : MonoBehaviour {
 		cb.ClearRenderTarget(true, true, new Color(0,0,0,0) );
 		//cb.DrawRenderer(envRenderer, worldPosMaterial);
 		for (int i = 0; i < rendererCount; i++) {
-			cb.DrawRenderer (SplatManagerSystem.instance.m_Renderers[i], worldPosMaterial);
+			if (SplatManagerSystem.instance.m_Renderers[i] != null) {
+				cb.DrawRenderer(SplatManagerSystem.instance.m_Renderers[i], worldPosMaterial);
+			}
 		}
 
 		cb.SetRenderTarget(worldTangentTex);
 		cb.ClearRenderTarget(true, true, new Color(0,0,0,0) );
 		//cb.DrawRenderer(envRenderer, worldTangentMaterial);
 		for (int i = 0; i < rendererCount; i++) {
-			cb.DrawRenderer (SplatManagerSystem.instance.m_Renderers[i], worldTangentMaterial);
+			if (SplatManagerSystem.instance.m_Renderers[i] != null) {
+				cb.DrawRenderer(SplatManagerSystem.instance.m_Renderers[i], worldTangentMaterial);
+			}
 		}
 
 		cb.SetRenderTarget(worldBinormalTex);
 		cb.ClearRenderTarget(true, true, new Color(0,0,0,0) );
 		//cb.DrawRenderer(envRenderer, worldBiNormalMaterial);
 		for (int i = 0; i < rendererCount; i++) {
-			cb.DrawRenderer (SplatManagerSystem.instance.m_Renderers[i], worldBiNormalMaterial);
+			if (SplatManagerSystem.instance.m_Renderers[i] != null) {
+				cb.DrawRenderer(SplatManagerSystem.instance.m_Renderers[i], worldBiNormalMaterial);
+			}
 		}
 
 		// Only have to render the camera once!

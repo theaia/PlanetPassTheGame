@@ -48,8 +48,14 @@ public class SheepSpawner : MonoBehaviour
             }
 
             sheep.Add(newAgent);
-            GameControl.Instance.curSheep ++;
+            GameControl.Instance.curSheep = transform.childCount;
             GameControl.Instance.UpdateSheepCounter();
         }
+    }
+
+    public void ClearSheep() {
+        foreach(Transform _child in transform) {
+            Destroy(_child.gameObject);
+		}
     }
 }

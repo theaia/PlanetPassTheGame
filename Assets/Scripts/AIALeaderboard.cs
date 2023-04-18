@@ -122,7 +122,7 @@ public class AIALeaderboard : MonoBehaviour{
         string _leaderboardText = "";
         for (int i = 0; i < playerScoreWrapper.results.Count; i++) {
             if (playerScoreWrapper.results[i].PlayerId == AuthenticationService.Instance.PlayerId) {
-                _leaderboardText += "<color=#5CD6F2>";
+                _leaderboardText += "<color=yellow>";
             }
 
             _leaderboardText += playerScoreWrapper.results[i].Rank + 1 + ". ";
