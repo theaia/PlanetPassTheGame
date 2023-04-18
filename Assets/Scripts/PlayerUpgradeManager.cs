@@ -15,17 +15,19 @@ public class PlayerUpgradeManager : MonoBehaviour
     }
     
     public PlayerUpgrade[] playerUpgrades;
-    int[] upgradeChoices = new int[3];
+    //int[] upgradeChoices = new int[3];
 
     [Header("Refrences")]
     public GameObject upgradeScreen;
     public GameControl gameController;
+    public TextMeshProUGUI bombUpgradeText;
+    public TextMeshProUGUI shieldUpgradeText;
     
     [Header("UI")]
     public Image[] upgradeIcons;
     public TMP_Text[] upgradeLabels;
     
-    public void SetupUpgradeScreen()
+    /*public void SetupUpgradeScreen()
     {
         upgradeScreen.SetActive(true);
         Time.timeScale = 0;
@@ -50,14 +52,15 @@ public class PlayerUpgradeManager : MonoBehaviour
             i--;
         }
 
-    }
+    }*/
 
     public void UpgradeButton(int buttonIndex)
     {
-        upgradeScreen.SetActive(false);
-        Time.timeScale = 1;
+        if(GameControl.Instance.UpgradePoints <= 0) {
+            return;
+		}
 
-        ActivateUpgrade(upgradeChoices[buttonIndex]);
+        ActivateUpgrade(buttonIndex);
     }
 
     private void ActivateUpgrade(int index)
@@ -76,21 +79,26 @@ public class PlayerUpgradeManager : MonoBehaviour
         }
         else if(index == 2) // 1st = unlock bombs, stacks = decrease bomb recharge time by 25%
         {
-            if(playerUpgrades[index].stacks == 1)
+            if (playerUpgrades[index].stacks == 1) {
                 gameController.buildManager.UnlockBuilding(0);
-            else
+                bombUpgradeText.text = "Faster bomb recharge";
+            } else {
                 gameController.buildManager.buildings[0].rechargeSpeedMod *= 0.75f;
+            }
         }
         else if(index == 3) // 1st = unlock shield, stacks = decrease shield recharge time by 25%
         {
-            if(playerUpgrades[index].stacks == 1)
+            if (playerUpgrades[index].stacks == 1) {
                 gameController.buildManager.UnlockBuilding(1);
-            else
+                shieldUpgradeText.text = "Faster shield recharge";
+            } else {
                 gameController.buildManager.buildings[1].rechargeSpeedMod *= 0.75f;
+            }
         }
         else if(index == 4) // increase shoot damage by 25%
         {
             gameController.turret.upgradeShootDamMod *= 0.75f;
         }
+        GameControl.Instance.AddUpgradePoints(-1);
     }
 }

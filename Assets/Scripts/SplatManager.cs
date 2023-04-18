@@ -54,7 +54,7 @@ public class SplatManagerSystem
 			m_RendererAray.Add (new List<Renderer> ());
 		}
 
-		Debug.Log ("Adding Renderer");
+		//Debug.Log ("Adding Renderer");
 		m_RendererAray [renderer.lightmapIndex].Add (renderer);
 		m_Renderers.Add (renderer);
 	}

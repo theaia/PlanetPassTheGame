@@ -42,6 +42,9 @@ public class GameControl : MonoBehaviour
     public Slider shootSlider;
     public GameObject dummyPlanet;
     public GameObject activePlanet;
+    public Transform placedObjects;
+    public int UpgradePoints;
+    public TextMeshProUGUI UpgradePointText;
 
     [Header("Sheep Management")]
     public int curSheep = 0;
@@ -74,6 +77,8 @@ public class GameControl : MonoBehaviour
             return;
 		}
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+        AddUpgradePoints(0); //Sets Display;
     }
 
     public bool IsGameOver() {
@@ -90,10 +95,16 @@ public class GameControl : MonoBehaviour
             dummyPlanet.SetActive(true);
             activePlanet.transform.parent.position = -Camera.main.transform.right * 500f;
             sheepSpawner.ClearSheep();
+            ClearPlacedObjects();
             StartCoroutine(MoveInNewPlanet());
         });
     }
 
+    private void ClearPlacedObjects() {
+        foreach(Transform _child in placedObjects) {
+            Destroy(_child);
+		}
+	}
 
     IEnumerator MoveInNewPlanet() {
         yield return new WaitForSeconds(1f);
@@ -156,6 +167,11 @@ public class GameControl : MonoBehaviour
         xpSlider.value = (float)xp/(float)maxXp;
     }
 
+    public void AddUpgradePoints(int _value) {
+        UpgradePoints += _value;
+        UpgradePointText.text = UpgradePoints.ToString();
+	}
+
     public void AddScore(int _score) {
         int _startingScore = Score;
         Score += _score;
@@ -165,6 +181,7 @@ public class GameControl : MonoBehaviour
     public void ProcessWorldCoveragePoints() {
         if(coveredPercent >= 25 * (worldCoverage + 1)) {
             worldCoverage++;
+            AddUpgradePoints(1);
             AddScore(25);
 		}
 
@@ -207,7 +224,7 @@ public class GameControl : MonoBehaviour
         curSheep --;
         UpdateSheepCounter();
         if(curSheep == 0 && !IsTransitioningWorlds) {
-            Debug.Log("Ending game. Sheep:" + curSheep + " IsTransitioningWorlds:" + IsTransitioningWorlds);
+            //Debug.Log("Ending game. Sheep:" + curSheep + " IsTransitioningWorlds:" + IsTransitioningWorlds);
             GameOver();
 		}
     }

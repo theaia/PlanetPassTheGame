@@ -57,6 +57,9 @@ public class PlaceObject : MonoBehaviour
 		//camAnim.SetTrigger("shake");
 
 		Instantiate(buildEffect, transform.position, Quaternion.identity, earth.transform);
+		if(gameObject.tag != "Sheep") {
+			transform.SetParent(GameControl.Instance.placedObjects);
+		}
 		//transform.parent = earth.transform;
 		isMoving = false;
 		col.enabled = true;
