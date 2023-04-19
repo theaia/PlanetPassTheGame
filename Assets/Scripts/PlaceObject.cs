@@ -45,20 +45,27 @@ public class PlaceObject : MonoBehaviour
 			transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
 		}
 
-		if(Input.GetMouseButtonUp(0))
+		if(Input.GetMouseButtonUp(0) || GameControl.Instance.IsTransitioningWorlds)
 		{
-			if(anim != null)
-				anim.SetTrigger("popIn");
-			//camAnim.SetTrigger("shake");
-
-			Instantiate(buildEffect, transform.position, Quaternion.identity, earth.transform);
-			transform.parent = earth.transform;
-			isMoving = false;
-			col.enabled = true;
-
-			if(buildingController != null)
-				buildingController.BuildingPlaced();
+			PlaceDown();
 		}
+	}
+
+	public void PlaceDown() {
+		if (anim != null)
+			anim.SetTrigger("popIn");
+		//camAnim.SetTrigger("shake");
+
+		Instantiate(buildEffect, transform.position, Quaternion.identity, earth.transform);
+		if(gameObject.tag != "Sheep") {
+			transform.SetParent(GameControl.Instance.placedObjects);
+		}
+		//transform.parent = earth.transform;
+		isMoving = false;
+		col.enabled = true;
+
+		if (buildingController != null)
+			buildingController.BuildingPlaced();
 	}
 
 }

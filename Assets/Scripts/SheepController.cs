@@ -11,8 +11,6 @@ public class SheepController : MonoBehaviour
 
     public PlaceObject placeScript;
 
-    bool dragged;
-    Camera gameCam;
 
     [SerializeField]
     private Transform sheepVisual;
@@ -28,14 +26,12 @@ public class SheepController : MonoBehaviour
     private void Start()
     {
         parentTrans = transform.parent;
-        gameCam = Camera.main;	
 
         woolModel.SetActive(true);
     }
 
     public void StartDraggingSheep()
     {
-        dragged = true;
         placeScript.isMoving = true;
     }
 
@@ -46,6 +42,7 @@ public class SheepController : MonoBehaviour
 
     public void HarvestWool()
     {
+        GameControl.Instance.AddScore(25);
         hasWool = false;
 
         woolModel.SetActive(false);
@@ -62,6 +59,6 @@ public class SheepController : MonoBehaviour
 
     private void OnDisable()
     {
-        GameObject.Find("Game Control").GetComponent<GameControl>().SheepDied();
+        GameControl.Instance.SheepDied();
     }
 }

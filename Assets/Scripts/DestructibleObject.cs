@@ -55,4 +55,10 @@ public class DestructibleObject : MonoBehaviour
     {
         canDestroy = true;
     }
+
+	private void OnDisable() {
+		if (GameControl.Instance && isEnemy) {
+			GameControl.Instance.AddScore(5);
+		}
+	}
 }

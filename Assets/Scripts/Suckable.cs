@@ -37,10 +37,10 @@ public class Suckable : MonoBehaviour
 
     private void Update()
     {
-        if(inShield)
+        if(inShield || GameControl.Instance.IsTransitioningWorlds || !GameControl.Instance.CanSuck)
             return;
         
-        if(beingSucked)
+        if(beingSucked && goalTrans != null)
         {
             transform.position = Vector3.MoveTowards(transform.position, goalTrans.position, suckSpeed);
 
@@ -55,7 +55,11 @@ public class Suckable : MonoBehaviour
     {
         if(inShield)
             return;
-        
+        PlaceObject _po = GetComponent<PlaceObject>();
+        if(_po != null) {
+            _po.PlaceDown();
+            _po.canMoveAgain = false;
+		}
         goalTrans = goal;
         beingSucked = true;
 

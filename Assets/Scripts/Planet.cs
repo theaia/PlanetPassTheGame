@@ -16,12 +16,15 @@ public class Planet : MonoBehaviour
 
 	private void FixedUpdate()
 	{
+		if (GameControl.Instance.IsGameOver()) {
+			return;
+		}
 		float x = Input.GetAxis("Horizontal") * rotationSpeed * Time.fixedDeltaTime;
 		float y = Input.GetAxis("Vertical") * rotationSpeed * Time.fixedDeltaTime;
 
 		if(x != 0)
-			rb.AddTorque(Vector3.down * x, ForceMode.VelocityChange);
+			rb.AddTorque(transform.up * x, ForceMode.VelocityChange);
 		if(y != 0)
-			rb.AddTorque(Vector3.right * y, ForceMode.VelocityChange);
+			rb.AddTorque(transform.right * y, ForceMode.VelocityChange);
 	}
 }

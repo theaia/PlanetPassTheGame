@@ -9,7 +9,6 @@ public class SheepSpawner : MonoBehaviour
     [SerializeField]
     [Tooltip("The number of sheep to spawn at the start of the game")]
     private int startingSheep = 1;
-    public GameControl gameController;
 
     [Header("Prefabs")]
     [SerializeField]
@@ -22,6 +21,7 @@ public class SheepSpawner : MonoBehaviour
 
     private void Start()
     {
+        GameControl.Instance.sheepSpawner = this;
         earth = GameObject.FindGameObjectWithTag("Earth").transform;
 
         SpawnSheep(startingSheep);
@@ -29,6 +29,7 @@ public class SheepSpawner : MonoBehaviour
 
     public void SpawnSheep(int amount)
     {
+
         for(int i = 0; i < amount; i++)
         {
             // find a random pos on surface of planet
@@ -48,8 +49,13 @@ public class SheepSpawner : MonoBehaviour
             }
 
             sheep.Add(newAgent);
-            gameController.curSheep ++;
-            gameController.UpdateSheepCounter();
+            GameControl.Instance.UpdateSheepCounter();
         }
+    }
+
+    public void ClearSheep() {
+        foreach(Transform _child in transform) {
+            Destroy(_child.gameObject);
+		}
     }
 }

@@ -29,6 +29,7 @@ public class EnemySpawner : MonoBehaviour
         target.parent = earth.transform; 
 
         timeBtwSpawn = startTimeBtwSpawn + extraStartDelay;
+        GameControl.Instance.enemySpawner = this;
     }
 
 

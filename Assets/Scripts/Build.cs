@@ -16,6 +16,7 @@ public class Build : MonoBehaviour
     }
 
     public BuildingProperties[] buildings;
+    public GameObject noneText;
 
     public void BuildObject(int index)
     { 
@@ -38,6 +39,7 @@ public class Build : MonoBehaviour
 
     public void UnlockBuilding(int index)
     {
+        noneText.SetActive(false);
         buildings[index].unlocked = true;
         buildings[index].buttonObj.SetActive(true);
     }

@@ -16,6 +16,9 @@ public class CameraController : MonoBehaviour
     }
 
     void Update(){
+		if (GameControl.Instance.IsGameOver()) {
+			return;
+		}
 		if (Input.GetAxis("Mouse ScrollWheel") > 0f && cam.fieldOfView > zoomMax) // forward
 		{
 			cam.fieldOfView -= zoomAmount;
