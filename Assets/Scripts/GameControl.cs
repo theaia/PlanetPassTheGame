@@ -47,7 +47,7 @@ public class GameControl : MonoBehaviour
     public TextMeshProUGUI UpgradePointText;
     public float SplatScale = 5f;
     public int woolChargeAmount = 10;
-    public float newWorldCooldown = 3f;
+    private float newWorldCooldown = 4f;
     public bool CanSuck = true;
 
     [Header("Sheep Management")]
