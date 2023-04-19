@@ -51,7 +51,7 @@ public class PlaceObject : MonoBehaviour
 		}
 	}
 
-	private void PlaceDown() {
+	public void PlaceDown() {
 		if (anim != null)
 			anim.SetTrigger("popIn");
 		//camAnim.SetTrigger("shake");

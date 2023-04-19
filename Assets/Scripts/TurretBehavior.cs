@@ -10,7 +10,6 @@ public class TurretBehavior : MonoBehaviour
     
     [Header("Properties")]
     public float maxCharge = 100, curCharge;
-    public float woolChargeAmount = 10;
 
     [HideInInspector]
     public float upgradeShootSpeedMod = 1f, upgradeShootDamMod = 1f;
@@ -34,7 +33,7 @@ public class TurretBehavior : MonoBehaviour
 
     public void AddCharge()
     {
-        curCharge += woolChargeAmount;
+        curCharge += GameControl.Instance.woolChargeAmount;
         UpdateCharge();
     }
 

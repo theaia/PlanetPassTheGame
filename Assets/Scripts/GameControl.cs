@@ -45,6 +45,10 @@ public class GameControl : MonoBehaviour
     public Transform placedObjects;
     public int UpgradePoints;
     public TextMeshProUGUI UpgradePointText;
+    public float SplatScale = 5f;
+    public int woolChargeAmount = 10;
+    public float newWorldCooldown = 3f;
+    public bool CanSuck = true;
 
     [Header("Sheep Management")]
     public int curSheep = 0;
@@ -53,13 +57,7 @@ public class GameControl : MonoBehaviour
     public RectTransform sheepBG;
     public RectTransform sheepFilled;
 
-    Vector4 channelMask = new Vector4(0f, 0f, 1f, 0f);
-    int spritesX = 1;
-    int spritesY = 1;
     int worldCoverage = 0;
-
-    public float grassScale = 1.0f;
-
 
     public GameObject GameOverScreen;
     private bool gameOver;
@@ -89,9 +87,9 @@ public class GameControl : MonoBehaviour
         if(IsTransitioningWorlds) {
             return;
 		}
-        curSheep = -1;
+        //Debug.Log("Getting new world");
         IsTransitioningWorlds = true;
-        activePlanet.transform.parent.DOMove(-Camera.main.transform.right * 500f, .5f).SetEase(Ease.InBounce).OnComplete(() => {
+        activePlanet.transform.parent.DOMove(-Camera.main.transform.right * 500f, .5f).SetEase(Ease.InElastic, .01f).OnComplete(() => {
             dummyPlanet.SetActive(true);
             activePlanet.transform.parent.position = -Camera.main.transform.right * 500f;
             sheepSpawner.ClearSheep();
@@ -102,23 +100,29 @@ public class GameControl : MonoBehaviour
 
     private void ClearPlacedObjects() {
         foreach(Transform _child in placedObjects) {
-            Destroy(_child);
+            Destroy(_child.gameObject);
 		}
 	}
 
     IEnumerator MoveInNewPlanet() {
-        yield return new WaitForSeconds(1f);
-        activePlanet.transform.parent.DOMove(Vector3.zero, 1f).SetEase(Ease.OutBounce).OnComplete(() => {
+        yield return new WaitForSeconds(.5f);
+        activePlanet.transform.parent.DOMove(Vector3.zero, 1f).SetEase(Ease.OutElastic, .01f).OnComplete(() => {
             coveredPercent = 0f;
             worldCoverage = 0;
             SplatManager.Instance.Start();
             UpdateCoveredPercent();
             dummyPlanet.SetActive(false);
             sheepSpawner.SpawnSheep(1);
+            IsTransitioningWorlds = false;
+            CanSuck = false;
+            Invoke("EnableCanSuck", newWorldCooldown);
         });
-        yield return new WaitUntil(() => curSheep > 0); 
-        IsTransitioningWorlds = false;
+
     }
+
+    private void EnableCanSuck() {
+        CanSuck = true;
+	}
 
 	private void Start()
     {
@@ -132,6 +136,8 @@ public class GameControl : MonoBehaviour
 
         UpdateSheepCounter();
         UpdateCoveredPercent();
+
+        CanSuck = true;
     }
     
     private void Update()
@@ -173,6 +179,9 @@ public class GameControl : MonoBehaviour
 	}
 
     public void AddScore(int _score) {
+		if (gameOver) {
+            return;
+		}
         int _startingScore = Score;
         Score += _score;
         StartCoroutine(LerpScore(_startingScore, Score, .5f));
@@ -185,7 +194,7 @@ public class GameControl : MonoBehaviour
             AddScore(25);
 		}
 
-        if(worldCoverage == 4) {
+        if(worldCoverage == 4 && !IsTransitioningWorlds) {
             SpawnNewPlanet();
 		}
 	}
@@ -210,7 +219,10 @@ public class GameControl : MonoBehaviour
         xp = 0;
         maxXp = (int)(startXpCost + (xpCurve.Evaluate((float)level/(float)maxLevel) * maxXpCost));
 
-        // spawn an extra sheep
+		// spawn an extra sheep
+		if (IsTransitioningWorlds) {
+            return;
+		}
         sheepSpawner.SpawnSheep(1);
         maxSheep ++;
         UpdateSheepCounter();
@@ -221,16 +233,21 @@ public class GameControl : MonoBehaviour
 
     public void SheepDied()
     {
-        curSheep --;
         UpdateSheepCounter();
-        if(curSheep == 0 && !IsTransitioningWorlds) {
-            //Debug.Log("Ending game. Sheep:" + curSheep + " IsTransitioningWorlds:" + IsTransitioningWorlds);
+        if(curSheep == 0 && !gameOver) {
             GameOver();
 		}
     }
 
     public void UpdateSheepCounter()
     {
+        int _curSheep = 0;
+        foreach(Transform _child in sheepSpawner.transform) {
+            if (_child.gameObject.activeSelf) {
+                _curSheep++;
+            }
+		}
+        curSheep = _curSheep;
         sheepSlider.value = curSheep;
         sheepSlider.maxValue = maxSheep;
         if(sheepBG) sheepBG.sizeDelta = new Vector2(sheepBG.sizeDelta.x, 25.5f * maxSheep);

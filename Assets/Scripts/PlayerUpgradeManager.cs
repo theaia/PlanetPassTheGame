@@ -19,7 +19,6 @@ public class PlayerUpgradeManager : MonoBehaviour
 
     [Header("Refrences")]
     public GameObject upgradeScreen;
-    public GameControl gameController;
     public TextMeshProUGUI bombUpgradeText;
     public TextMeshProUGUI shieldUpgradeText;
     
@@ -66,38 +65,41 @@ public class PlayerUpgradeManager : MonoBehaviour
     private void ActivateUpgrade(int index)
     {
         playerUpgrades[index].stacks ++;
-        
-        if(index == 0) // revive dead sheep
-        {
-            int sheepToSpawn = gameController.maxSheep - gameController.curSheep;
-            if(sheepToSpawn != 0)
-                gameController.sheepSpawner.SpawnSheep(sheepToSpawn);
-        }
-        else if(index == 1) // decrease shoot delay by 25%
-        {
-            gameController.turret.upgradeShootSpeedMod *= 0.75f;
-        }
-        else if(index == 2) // 1st = unlock bombs, stacks = decrease bomb recharge time by 25%
-        {
-            if (playerUpgrades[index].stacks == 1) {
-                gameController.buildManager.UnlockBuilding(0);
-                bombUpgradeText.text = "Faster bomb recharge";
-            } else {
-                gameController.buildManager.buildings[0].rechargeSpeedMod *= 0.75f;
-            }
-        }
-        else if(index == 3) // 1st = unlock shield, stacks = decrease shield recharge time by 25%
-        {
-            if (playerUpgrades[index].stacks == 1) {
-                gameController.buildManager.UnlockBuilding(1);
-                shieldUpgradeText.text = "Faster shield recharge";
-            } else {
-                gameController.buildManager.buildings[1].rechargeSpeedMod *= 0.75f;
-            }
-        }
-        else if(index == 4) // increase shoot damage by 25%
-        {
-            gameController.turret.upgradeShootDamMod *= 0.75f;
+
+		switch (index) {
+            case 0: // revive dead sheep
+                int sheepToSpawn = GameControl.Instance.maxSheep - GameControl.Instance.curSheep;
+                if (sheepToSpawn != 0)
+                    GameControl.Instance.sheepSpawner.SpawnSheep(sheepToSpawn);
+                break;
+            case 1: // decrease shoot delay by 25%
+                GameControl.Instance.turret.upgradeShootSpeedMod *= 0.75f;
+                break;
+            case 2: // 1st = unlock bombs, stacks = decrease bomb recharge time by 25%
+                if (playerUpgrades[index].stacks == 1) {
+                    GameControl.Instance.buildManager.UnlockBuilding(0);
+                    bombUpgradeText.text = "Faster bomb recharge";
+                } else {
+                    GameControl.Instance.buildManager.buildings[0].rechargeSpeedMod *= 0.75f;
+                }
+                break;
+            case 3: // 1st = unlock shield, stacks = decrease shield recharge time by 25%
+                if (playerUpgrades[index].stacks == 1) {
+                    GameControl.Instance.buildManager.UnlockBuilding(1);
+                    shieldUpgradeText.text = "Faster shield recharge";
+                } else {
+                    GameControl.Instance.buildManager.buildings[1].rechargeSpeedMod *= 0.75f;
+                }
+                break;
+            case 4: // increase shoot damage by 25%
+                GameControl.Instance.turret.upgradeShootDamMod *= 0.75f;
+                break;
+            case 5: // increase splat radius
+                GameControl.Instance.SplatScale++;
+                break;
+            case 6: // Collect more wool per sheep
+                GameControl.Instance.woolChargeAmount += 2;
+                break;
         }
         GameControl.Instance.AddUpgradePoints(-1);
     }

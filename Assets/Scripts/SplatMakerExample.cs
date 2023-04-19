@@ -8,16 +8,10 @@ public class SplatMakerExample : MonoBehaviour {
 	int splatsX = 1;
 	int splatsY = 1;
 
-	public float splatScale = 1.0f;
-
-	// Use this for initialization
-	void Start () {
-	
-	}
 	
 	// Update is called once per frame
 	void Update () {
-		if(GameControl.Instance.mySheep != null) {
+		if(GameControl.Instance.mySheep != null || GameControl.Instance.IsGameOver()) {
 			return;
 		}
 		// Get how many splats are in the splat atlas
@@ -42,7 +36,7 @@ public class SplatMakerExample : MonoBehaviour {
 					newSplatObject.transform.rotation = Quaternion.LookRotation( leftVec, hit.normal );
 				}
 				newSplatObject.transform.RotateAround( hit.point, hit.normal, Random.Range(-180, 180 ) );
-				newSplatObject.transform.localScale = new Vector3( randScale, randScale * 0.5f, randScale ) * splatScale;
+				newSplatObject.transform.localScale = new Vector3( randScale, randScale * 0.5f, randScale ) * GameControl.Instance.SplatScale;
 
 				Splat newSplat;
 				newSplat.splatMatrix = newSplatObject.transform.worldToLocalMatrix;

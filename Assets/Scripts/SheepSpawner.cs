@@ -29,6 +29,7 @@ public class SheepSpawner : MonoBehaviour
 
     public void SpawnSheep(int amount)
     {
+
         for(int i = 0; i < amount; i++)
         {
             // find a random pos on surface of planet
@@ -48,7 +49,6 @@ public class SheepSpawner : MonoBehaviour
             }
 
             sheep.Add(newAgent);
-            GameControl.Instance.curSheep = transform.childCount;
             GameControl.Instance.UpdateSheepCounter();
         }
     }
