@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 using Unity.Services.Core;
 using Unity.Services.Authentication;
 using System.Threading.Tasks;
-using DG.Tweening;
 
 public class GameControl : MonoBehaviour
 {
@@ -87,15 +86,8 @@ public class GameControl : MonoBehaviour
         if(IsTransitioningWorlds) {
             return;
 		}
-        //Debug.Log("Getting new world");
-        IsTransitioningWorlds = true;
-        activePlanet.transform.parent.DOMove(-Camera.main.transform.right * 500f, .5f).SetEase(Ease.InElastic, .01f).OnComplete(() => {
-            dummyPlanet.SetActive(true);
-            activePlanet.transform.parent.position = -Camera.main.transform.right * 500f;
-            sheepSpawner.ClearSheep();
-            ClearPlacedObjects();
-            StartCoroutine(MoveInNewPlanet());
-        });
+        AddScore(100);
+        StartCoroutine(NewPlanet());
     }
 
     private void ClearPlacedObjects() {
@@ -104,20 +96,45 @@ public class GameControl : MonoBehaviour
 		}
 	}
 
-    IEnumerator MoveInNewPlanet() {
-        yield return new WaitForSeconds(.5f);
-        activePlanet.transform.parent.DOMove(Vector3.zero, 1f).SetEase(Ease.OutElastic, .01f).OnComplete(() => {
-            coveredPercent = 0f;
-            worldCoverage = 0;
-            SplatManager.Instance.Start();
-            UpdateCoveredPercent();
-            dummyPlanet.SetActive(false);
-            sheepSpawner.SpawnSheep(1);
-            IsTransitioningWorlds = false;
-            CanSuck = false;
-            Invoke("EnableCanSuck", newWorldCooldown);
-        });
+    IEnumerator NewPlanet() {
+        IsTransitioningWorlds = true;
 
+        Vector3 _targetPos = Camera.main.transform.right * 500f;
+        StartCoroutine(LerpMove(activePlanet.transform.parent.gameObject, _targetPos, .5f));
+
+        yield return new WaitForSeconds(1f);
+        dummyPlanet.SetActive(true);
+
+
+        activePlanet.transform.parent.position = -Camera.main.transform.right * 500f;
+        yield return new WaitForEndOfFrame();
+        StartCoroutine(LerpMove(activePlanet.transform.parent.gameObject, Vector3.zero, .5f));
+
+        sheepSpawner.ClearSheep();
+        ClearPlacedObjects();
+
+        yield return new WaitForSeconds(1f);
+
+        coveredPercent = 0f;
+        worldCoverage = 0;
+        SplatManager.Instance.Start();
+        UpdateCoveredPercent();
+        dummyPlanet.SetActive(false);
+        sheepSpawner.SpawnSheep(1);
+        IsTransitioningWorlds = false;
+        CanSuck = false;
+        Invoke("EnableCanSuck", newWorldCooldown);
+    }
+
+    IEnumerator LerpMove(GameObject _moveObject, Vector3 _targetPos, float _duration) {
+        float _timer = 0;
+        Vector3 _startingPos = _moveObject.transform.position;
+        while (_timer < _duration) {
+            _moveObject.transform.position = Vector3.Lerp(_startingPos, _targetPos, _timer/_duration);
+            _timer += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+        activePlanet.transform.parent.position = _targetPos;
     }
 
     private void EnableCanSuck() {
