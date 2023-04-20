@@ -93,16 +93,16 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.services.authentication": {
-      "version": "https://github.com/needle-mirror/com.unity.services.authentication.git",
+      "version": "2.5.0-pre.3",
       "depth": 0,
-      "source": "git",
+      "source": "registry",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2",
         "com.unity.services.core": "1.8.1",
         "com.unity.modules.unitywebrequest": "1.0.0",
         "com.unity.ugui": "1.0.0"
       },
-      "hash": "d346c1f561cbf664c74b7a1b288ed93b2201123c"
+      "url": "https://packages.unity.com"
     },
     "com.unity.services.core": {
       "version": "1.8.1",
